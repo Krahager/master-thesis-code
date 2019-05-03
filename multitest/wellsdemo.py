@@ -22,7 +22,7 @@ from sklearn.metrics import classification_report
 directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/demo"
 
 model_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'seismic.19-0.59.hdf5'
+model_name = 'wells.15-0.13.hdf5'
 
 model_path = os.path.join(model_dir, model_name)
 

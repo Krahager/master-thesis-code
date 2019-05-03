@@ -25,7 +25,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/Seismic"
 
 save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'keras_seismic_model.h5'
+model_name = 'keras_noda_seismic_model.h5'
 
 shape=(64,64)
 resize_shape=(shape[0],shape[1],3)
@@ -35,11 +35,11 @@ epochs = 20
 num_classes = 2
 
 #from keras.datasets import cifar10
-datagen = ImageDataGenerator(validation_split=0.2, samplewise_std_normalization=True,
-                              width_shift_range=0.2,
-                              height_shift_range=0.2,
-                              zoom_range=1.1,
-                              rotation_range=45
+datagen = ImageDataGenerator(validation_split=0.2, samplewise_std_normalization=False,
+                              # width_shift_range=0.2,
+                              # height_shift_range=0.2,
+                              # zoom_range=1.1,
+                              # rotation_range=45
                              )
 train_gen = datagen.flow_from_directory(
         directory,
@@ -67,56 +67,60 @@ val_gen = datagen.flow_from_directory(
 #setup model
 #cifar_model = M.msdnet(3, (2, 8), 10, use_dropout=True, dropout=0.25) #3, (2,2), nClasses
 rms_model = Sequential()
-rms_model.add(Conv2D(64, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+rms_model.add(Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
                      input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 # rms_model.add(Dropout(0.3))
-rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(32, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D((2, 2), padding='same'))
 
-rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
-rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 # rms_model.add(Dropout(0.4))
-rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
 # rms_model.add(Dropout(0.5))
 rms_model.add(Flatten())
-rms_model.add(Dense(4096, activation='linear', kernel_regularizer=regularizers.l2(0.01))) #tanh
+rms_model.add(Dense(2048, activation='linear', kernel_regularizer=regularizers.l2(0.01))) #tanh
 rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Dropout(0.5))
-rms_model.add(Dense(4096, activation='linear', kernel_regularizer=regularizers.l2(0.01))) #sigmoid
-rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Dropout(0.5))
+rms_model.add(Dropout(0.7))
+rms_model.add(Dense(2048, activation='relu', kernel_regularizer=regularizers.l2(0.01))) #sigmoid
+# rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(Dropout(0.7))
 rms_model.add(Dense(num_classes, activation='softmax'))
 
 print("Final layers added")
 
-#keras.losses.categorical_crossentropy
-rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(clipnorm=1., clipvalue=0.5),
+
+rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.0001, clipnorm=1., clipvalue=0.5),
                   metrics=['accuracy'])
 
 rms_model.summary()
 
 print(rms_model.get_weights())
 
+filepath = os.path.join(save_dir, "seismic.{epoch:02d}-{val_loss:.2f}.hdf5")
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+
 train_data = rms_model.fit_generator(
         train_gen,
-        steps_per_epoch=(84+84),
+        callbacks=[checkpoint],
+        steps_per_epoch=(84),#+84),
         epochs=epochs,
         validation_data=val_gen,
         validation_steps=21)
