@@ -10,9 +10,12 @@ from keras.layers import Conv2D, MaxPooling2D, AvgPool2D
 from keras.layers import ELU
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU, PReLU
+from keras import regularizers
+import os
 
 from keras.preprocessing.image import ImageDataGenerator
 #import msdexternal.models.msdmodel as M
+
 xrange = range
 izip = zip
 imap = map
@@ -21,81 +24,126 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 directory = "/home/krahager/PyUiTestResults/GridTest"
 
-shape=(32,32)
-resize_shape=(shape[0],shape[1],3)
+save_dir = os.path.join(os.getcwd(), 'saved_models')
+model_name = 'keras_grid_model.h5'
+
+shape = (214, 214)
+resize_shape = (shape[0], shape[1], 3)
+
+batch_size = 16
+epochs = 40
+num_classes = 2
+
 #from keras.datasets import cifar10
-datagen = ImageDataGenerator(validation_split=0.2, samplewise_std_normalization=True,
-                             rescale=1.0/255.0,
-                             width_shift_range=0.5,
-                             height_shift_range=0.5,
-                             zoom_range=2
+datagen = ImageDataGenerator(validation_split=0.2, samplewise_std_normalization=False,
+                              # width_shift_range=0.2,
+                              # height_shift_range=0.2,
+                              # zoom_range=1.1,
+                              # rotation_range=45
                              )
 train_gen = datagen.flow_from_directory(
         directory,
-        classes=['bounding', 'nob'],
+        classes=['nob', 'bounding'],
         target_size=shape,
         color_mode='rgb',
         class_mode="categorical",
         shuffle=True,
-        batch_size=10,
+        batch_size=batch_size,
         subset='training'
         )
 val_gen = datagen.flow_from_directory(
         directory,
-        classes=['bounding', 'nob'],
+        classes=['nob', 'bounding'],
         target_size=shape,
         color_mode='rgb',
         class_mode="categorical",
         shuffle=True,
-        batch_size=10,
+        batch_size=batch_size,
         subset='validation'
         )
 
 #batch_size = 64
-batch_size = 10
-epochs = 20
-num_classes = 2
 
 #setup model
 #cifar_model = M.msdnet(3, (2, 8), 10, use_dropout=True, dropout=0.25) #3, (2,2), nClasses
 rms_model = Sequential()
-rms_model.add(Conv2D(8, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same', input_shape=resize_shape))
+rms_model.add(Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+                     input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.3))
+rms_model.add(Conv2D(32, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D((2, 2), padding='same'))
-rms_model.add(Dropout(0.7))
-rms_model.add(Conv2D(16, (3, 3), activation='linear', padding='same'))
+
+rms_model.add(Conv2D(64, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+                     input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.3))
+rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(MaxPooling2D((2, 2), padding='same'))
+
+rms_model.add(Conv2D(128, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+                     input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.3))
+rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(MaxPooling2D((2, 2), padding='same'))
+
+rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
-rms_model.add(Dropout(0.6))
-rms_model.add(Conv2D(16, (3, 3), activation='linear', padding='same'))
+
+rms_model.add(Conv2D(512, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.4))
+rms_model.add(Conv2D(512, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
-rms_model.add(Dropout(0.6))
+
+# rms_model.add(Dropout(0.5))
 rms_model.add(Flatten())
-rms_model.add(Dense(4096, activation='linear')) #tanh
+rms_model.add(Dense(2048, activation='linear', kernel_regularizer=regularizers.l2(0.01))) #tanh
 rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Dropout(0.9))
-rms_model.add(Dense(2048, activation='linear')) #sigmoid
-rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Dropout(0.6))
+rms_model.add(Dropout(0.7))
+rms_model.add(Dense(2048, activation='relu', kernel_regularizer=regularizers.l2(0.01))) #sigmoid
+# rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(Dropout(0.7))
 rms_model.add(Dense(num_classes, activation='softmax'))
 
 print("Final layers added")
 
-#keras.losses.categorical_crossentropy
-rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(clipnorm=1., clipvalue=0.5),
+
+rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.00001, clipnorm=1.),
                   metrics=['accuracy'])
 
 rms_model.summary()
 
 print(rms_model.get_weights())
 
+filepath = os.path.join(save_dir, "grid.{epoch:02d}-{val_loss:.2f}.hdf5")
+checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+
 train_data = rms_model.fit_generator(
         train_gen,
-        steps_per_epoch=320,
-        epochs=30,
+        callbacks=[checkpoint],
+        steps_per_epoch=100,#+84),
+        epochs=epochs,
         validation_data=val_gen,
-        validation_steps=80)
+        validation_steps=25)
 
 print(rms_model.get_weights())
 
@@ -122,20 +170,29 @@ plt.title('Training and validation loss')
 plt.legend()
 plt.show()
 
-rms_model.save('/home/krahager/training_result_bounding_1.h5')
+# Save model and weights
+if not os.path.isdir(save_dir):
+    os.makedirs(save_dir)
+model_path = os.path.join(save_dir, model_name)
+rms_model.save(model_path)
+print('Saved trained model at %s ' % model_path)
 
 pred_gen = datagen.flow_from_directory(
         directory,
-        classes=['bounding', 'nob'],
-        target_size=(345, 189),
+        classes=['nob', 'bounding'],
+        target_size=shape,
         color_mode='rgb',
         class_mode="categorical",
         shuffle=False,
         batch_size=1,
         subset='validation'
         )
+
+names = pred_gen.filenames
+step = len(names)
+
 # Display classification report
-predicted_classes = rms_model.predict_generator(pred_gen, steps=400)
+predicted_classes = rms_model.predict_generator(pred_gen, steps=step)
 predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
 #predicted_classes = np.rint(predicted_classes)
 y_val = pred_gen.classes
@@ -144,4 +201,3 @@ target_names = ["Class {}".format(i) for i in range(num_classes)]
 print(confusion_matrix(y_val, predicted_classes))
 print(classification_report(y_val, predicted_classes, target_names=target_names))
 
-exit(0)

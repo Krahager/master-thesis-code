@@ -1,17 +1,7 @@
-import tensorflow
-import numpy as np
-from keras.utils import to_categorical
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 import keras
-from keras.models import Sequential,Input,Model
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.layers.normalization import BatchNormalization
-from keras.layers.advanced_activations import LeakyReLU
 from keras.preprocessing.image import ImageDataGenerator
-#import msdexternal.models.msdmodel as M
 import os
+import matplotlib.pyplot as plt
 
 xrange = range
 izip = zip
@@ -55,22 +45,50 @@ step = len(names)
 
 cifar_model = keras.models.load_model(model_path)
 
+layer_outputs_0 = [layer.output for layer in cifar_model.layers[:1]]
+
+activation_model_0 = keras.models.Model(inputs=cifar_model.input, outputs=layer_outputs_1)
+
+models = [activation_model_0]
+
+for x in range(1, 12):
+        layer_outputs_x = [layer.output for layer in cifar_model.layers[x: (x + 1)]]
+        activation_model_x = keras.models.Model(inputs=models[x-1].output, outputs=layer_outputs_x)
+        models.append(activation_model_x)
+
+# layer_outputs_2 = [layer.output for layer in cifar_model.layers[1:2]]
+#
+# activation_model_2 = keras.models.Model(inputs=activation_model_1.output, outputs=layer_outputs_2)
+#
+# layer_outputs_3 = [layer.output for layer in cifar_model.layers[2:3]]
+#
+# activation_model_3 = keras.models.Model(inputs=activation_model_2.output, outputs=layer_outputs_3)
+
 num_classes = 2
-# x, y = izip(*(val_gen[i] for i in xrange(len(val_gen))))
-# x_val, y_val = np.vstack(x), np.vstack(y)
-#train_X, train_Y = train_gen
-#test_X, test_Y = val_gen
 
 print(len(names))
 
-# Display classification report
+results = []
+
+activations = activation_model_0.predict_generator(val_gen, steps=step)
+results.append(activations)
+
+for x in range(1, len(models)):
+        activations = models[x].predict(results)
+
+
+print("activations: " + str(len(activations)))
+
+for x in range(len(activations)):
+        activation = activations[x]
+        print(str(len(activation)))
+        plt.imshow(activation[0, :, :, 4], cmap='viridis')
+        plt.show()
+
 predicted_classes = cifar_model.predict_generator(val_gen, steps=step)
-# print(predicted_classes)
 
 print("Printing predictions for horizon model: [true | false]")
 for x in range(len(names)):
     print("File " + names[x] + " result: " + str(predicted_classes[x]))
 
-# predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
-# target_names = ["Class {}".format(i) for i in range(num_classes)]
-# print(classification_report(y_val, predicted_classes, target_names=target_names))
+exit(0)
