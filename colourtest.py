@@ -7,7 +7,7 @@ import os
 directory = "/home/krahager/PyUiTestResults/ViewportColorTest"
 
 save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'color.30-4.32.hdf5'
+model_name = 'background_color.hdf5'
 
 shape = (214, 214)
 resize_shape = (shape[0], shape[1], 3)

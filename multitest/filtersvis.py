@@ -204,7 +204,7 @@ def visualize_layer(model,
                     height_margin: height_margin + output_dim[1], :] = img
 
         # save the result to disk
-        save_img('vgg_{0:}_{1:}x{1:}.png'.format(layer_name, n), stitched_filters)
+        save_img('horizon_{0:}_{1:}x{1:}.png'.format(layer_name, n), stitched_filters)
 
     # this is the placeholder for the input images
     assert len(model.inputs) == 1
@@ -243,12 +243,12 @@ def visualize_layer(model,
 if __name__ == '__main__':
     # the name of the layer we want to visualize
     # (see model definition at keras/applications/vgg16.py)
-    LAYER_NAME = 'conv2d_6'
+    LAYER_NAME = 'conv2d_10'
 
     # Generate model path
     directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/demo"
     model_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = 'wells.15-0.13.hdf5'
+    model_name = 'horizon.hdf5'
     model_path = os.path.join(model_dir, model_name)
 
     # build the VGG16 network with ImageNet weights

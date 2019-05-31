@@ -22,11 +22,11 @@ from sklearn.metrics import classification_report
 directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/demo"
 
 model_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'seismic.19-0.59.hdf5'
+model_name = 'horizon.hdf5'
 
 model_path = os.path.join(model_dir, model_name)
 
-shape=(64,64)
+shape=(214,214)
 resize_shape=(shape[0],shape[1],3)
 
 #from keras.datasets import cifar10
@@ -74,3 +74,4 @@ for x in range(len(names)):
 # predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
 # target_names = ["Class {}".format(i) for i in range(num_classes)]
 # print(classification_report(y_val, predicted_classes, target_names=target_names))
+exit(0)

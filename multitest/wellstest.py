@@ -7,9 +7,9 @@ import os
 directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/Wells"
 
 save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'wells_full.25-6.17.hdf5'
+model_name = 'wells_full_vgg.hdf5'
 
-shape = (214, 214)
+shape = (224, 224)
 resize_shape = (shape[0], shape[1], 3)
 
 num_classes = 2
