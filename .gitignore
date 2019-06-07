@@ -1,2 +1,4 @@
 venv/
 .idea/
+*.hdf5
+*.hd5
