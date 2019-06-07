@@ -14,7 +14,6 @@ from keras import regularizers
 import os
 
 from keras.preprocessing.image import ImageDataGenerator
-#import msdexternal.models.msdmodel as M
 
 xrange = range
 izip = zip
@@ -34,7 +33,6 @@ batch_size = 16
 epochs = 40
 num_classes = 2
 
-#from keras.datasets import cifar10
 datagen = ImageDataGenerator(validation_split=0.2, samplewise_std_normalization=False,
                               # width_shift_range=0.2,
                               # height_shift_range=0.2,
@@ -65,7 +63,6 @@ val_gen = datagen.flow_from_directory(
 #batch_size = 64
 
 #setup model
-#cifar_model = M.msdnet(3, (2, 8), 10, use_dropout=True, dropout=0.25) #3, (2,2), nClasses
 rms_model = Sequential()
 rms_model.add(Conv2D(32, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
                      input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
@@ -116,10 +113,10 @@ rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
 # rms_model.add(Dropout(0.5))
 rms_model.add(Flatten())
-rms_model.add(Dense(2048, activation='linear', kernel_regularizer=regularizers.l2(0.01))) #tanh
+rms_model.add(Dense(2048, activation='linear', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(Dropout(0.7))
-rms_model.add(Dense(2048, activation='relu', kernel_regularizer=regularizers.l2(0.01))) #sigmoid
+rms_model.add(Dense(2048, activation='relu', kernel_regularizer=regularizers.l2(0.01)))
 # rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(Dropout(0.7))
 rms_model.add(Dense(num_classes, activation='softmax'))
