@@ -25,13 +25,13 @@ from sklearn.metrics import classification_report, confusion_matrix
 directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/Wells"
 
 save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'keras_wells_clipnorm_model.h5'
+model_name = 'keras_wells_full_model.h5'
 
-shape=(64,64)
+shape=(214,214)
 resize_shape=(shape[0],shape[1],3)
 
 batch_size = 16
-epochs = 20
+epochs = 40
 num_classes = 2
 
 #from keras.datasets import cifar10
@@ -77,19 +77,39 @@ rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D((2, 2), padding='same'))
 
+rms_model.add(Conv2D(64, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+                     input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.3))
 rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
-rms_model.add(Conv2D(64, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(MaxPooling2D((2, 2), padding='same'))
+
+rms_model.add(Conv2D(128, kernel_size=(3, 3), strides=(1, 1), activation='linear', padding='same',
+                     input_shape=resize_shape, kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+# rms_model.add(Dropout(0.3))
+rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(MaxPooling2D((2, 2), padding='same'))
+
+rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(BatchNormalization())
+rms_model.add(LeakyReLU(alpha=0.01))
+rms_model.add(Conv2D(256, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
 
-rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(512, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 # rms_model.add(Dropout(0.4))
-rms_model.add(Conv2D(128, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
+rms_model.add(Conv2D(512, (3, 3), activation='linear', padding='same', kernel_regularizer=regularizers.l2(0.01)))
 rms_model.add(BatchNormalization())
 rms_model.add(LeakyReLU(alpha=0.01))
 rms_model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))
@@ -107,14 +127,14 @@ rms_model.add(Dense(num_classes, activation='softmax'))
 print("Final layers added")
 
 
-rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.0001, clipnorm=1.),
+rms_model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.00001, clipnorm=1.),
                   metrics=['accuracy'])
 
 rms_model.summary()
 
 print(rms_model.get_weights())
 
-filepath = os.path.join(save_dir, "wells_cn.{epoch:02d}-{val_loss:.2f}.hdf5")
+filepath = os.path.join(save_dir, "wells_full.{epoch:02d}-{val_loss:.2f}.hdf5")
 checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
 tensorboard = keras.callbacks.TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
 
