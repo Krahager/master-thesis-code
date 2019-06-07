@@ -10,7 +10,6 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 from keras.preprocessing.image import ImageDataGenerator
-#import msdexternal.models.msdmodel as M
 import os
 
 xrange = range
@@ -19,17 +18,22 @@ imap = map
 
 from sklearn.metrics import classification_report
 
-directory = "/home/krahager/PyUiTestResults/MultiDetectionTest/demo"
+# Path to directory containing images to be verified by model
+# Images must be in a subdirectory of this path
+directory = "/path/to/demo"
 
+# Get path to model. model_name should be name of model used
 model_dir = os.path.join(os.getcwd(), 'saved_models')
 model_name = 'horizon.hdf5'
 
 model_path = os.path.join(model_dir, model_name)
 
+# Dimensions of input image. Image will be scaled to these dimensions
+# Must be the same input shape as specified during training
 shape=(214,214)
 resize_shape=(shape[0],shape[1],3)
 
-#from keras.datasets import cifar10
+# Use ImageDataGenerator to load images
 datagen = ImageDataGenerator(validation_split=None)
 # train_gen = datagen.flow_from_directory(
 #         directory,
@@ -50,28 +54,24 @@ val_gen = datagen.flow_from_directory(
         subset=None
         )
 
+# Count images in subdirectories
 names = val_gen.filenames
 step = len(names)
 
+# Load the model
 cifar_model = keras.models.load_model(model_path)
 
 num_classes = 2
-# x, y = izip(*(val_gen[i] for i in xrange(len(val_gen))))
-# x_val, y_val = np.vstack(x), np.vstack(y)
-#train_X, train_Y = train_gen
-#test_X, test_Y = val_gen
 
+# Print length of names for debugging purposes
 print(len(names))
 
-# Display classification report
+# Predict classes of the images
 predicted_classes = cifar_model.predict_generator(val_gen, steps=step)
-# print(predicted_classes)
 
+# Print predictions
 print("Printing predictions for horizon model: [true | false]")
 for x in range(len(names)):
     print("File " + names[x] + " result: " + str(predicted_classes[x]))
 
-# predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
-# target_names = ["Class {}".format(i) for i in range(num_classes)]
-# print(classification_report(y_val, predicted_classes, target_names=target_names))
 exit(0)
