@@ -4,7 +4,7 @@ The dependencies for this project can be installed by running the following in t
 ```bash
 pip install -r requirements.txt
 ```
-It should be noted that Tensorflow doesn't officially support AMD GPUs, due to TF using CUDA.
+If python or TensorFlow complains about missing DLL files, remove the tensorflow-gpu package
 
 ## Structure
 Files in this repository uses a naming content consisting of the name of the object and the following suffixes:
