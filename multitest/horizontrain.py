@@ -26,7 +26,7 @@ directory = "/path/to/horizon"
 
 # Name and save dir where the final model will be saved
 save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'keras_noda_seismic_model.h5'
+model_name = 'keras_seismic_model.h5'
 
 # Input shape of the network
 # Should not be below 214x214
@@ -143,7 +143,7 @@ checkpoint = keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss', verbo
 train_data = rms_model.fit_generator(
         train_gen,
         callbacks=[checkpoint],
-        steps_per_epoch=(84),#+84),
+        steps_per_epoch=(84),
         epochs=epochs,
         validation_data=val_gen,
         validation_steps=21)
